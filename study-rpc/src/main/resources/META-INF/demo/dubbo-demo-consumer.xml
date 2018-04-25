@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+    <dubbo:application name="demo-consumer"/>
+    <!-- 使用multicast（组广播）广播注册中心暴露服务地址;关闭某个服务的启动时检查：(没有提供者时报错) check="false"--> 
+    <dubbo:registry address="zookeeper://192.168.155.81:52989"/>
+    <!-- 生成远程服务代理，可以和本地bean一样使用demoService ;在下面加上 url="dubbo://192.168.145.172:20880"表示直连，不通过zookeeeper注册中心，在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者-->
+    <!--  timeout="3000" 连接服务端超时时间;如果服务提供者没有提供版本那么默认是version="0.0.0"； retries=""默认重试2次-->
+          <!--  当一个接口的实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用 -->
+    <!-- dubbo重试其实很恶心，只要在超时时间内没有返回数据，那么就会重试，比如发送邮件，可能就会发出多份重复邮件，执行注册请求时，就会插入多条重复的注册数据。一般超时慎用 -->
+    <dubbo:reference id="demoService" interface="com.yixin.study.rpc.demo.DemoService" timeout="20" version="0.0.0" retries="3"/>
+    
+    <bean id="serviceTest" class="com.yixin.study.rpc.demo.ServiceTest"/>
+</beans>

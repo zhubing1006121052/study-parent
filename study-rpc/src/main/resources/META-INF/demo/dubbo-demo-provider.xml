@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <!-- name必填。当前应用名称，用于注册中心计算应用间依赖关系，注意：消费者和提供者应用名不要一样 -->
+    <dubbo:application name="demo-provider"/>
+    <!-- 使用multicast（组广播）广播注册中心暴露服务地址  ;group="dubbo"设置 zookeeper 的根节点，不设置将使用无根树,默认就是/dubbo--> 
+    <dubbo:registry address="zookeeper://192.168.155.81:52989" group="dubbo"/>
+    <!-- 用dubbo协议在20880端口暴露服务 -->
+    <!-- threadpool：线程池类型，可选：fixed/cached ，默认fixed 。threads ：服务线程池大小(固定大小) ，默认为100 -->  
+    <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="5"/>
+    <!-- 声明需要暴露的服务接口 -->  <!--默认使用 dubbo 协议实现定义好的 接口 protocol="dubbo"-->
+	   <!--版本的作用  当一个接口实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用。
+	一般处理步骤
+	1）在低压力时间段，先升级一半提供者为新版本
+	2）再将所有消费者升级为新版本
+	3）然后将剩下的一半提供者升级为新版本  version="1.0.0" 当一个接口的实现，出现不兼容升级时，可以用版本号过渡，版本号不同的服务相互间不引用
+	4）服务分组，当一个接口有多个实现，可以用分组区分-->
+	<!-- group：当一个接口有多种实现时，可以用group区分； -->
+    <dubbo:service interface="com.yixin.study.rpc.demo.DemoService" ref="demoService" timeout="0"/>
+    <dubbo:service interface="com.yixin.study.rpc.demo.HelloWorldService" ref="helloworldService">
+    	<dubbo:method name="sayHelloWorld" timeout="10"/>
+    	<dubbo:method name="acceptMessage" />
+    </dubbo:service>
+    <!-- 和本地bean一样实现服务 -->  
+    <bean id="demoService" class="com.yixin.study.rpc.demo.DemoServiceImpl"/>
+    <bean id="helloworldService" class="com.yixin.study.rpc.demo.HelloWorldServiceImpl"/>
+    
+    <dubbo:provider timeout="500"/>
+</beans>

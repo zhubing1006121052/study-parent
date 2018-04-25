@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd   
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd   
+            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd  
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<import resource="sharding-jdbc.xml"/>
+	<util:properties id="p_datasource" location="classpath:META-INF/config/datasource.properties" />
+
+	<!-- 主数据源，使用alibaba druid连接池 -->
+	<bean id="masterDataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+		<property name="name" value="#{p_datasource['master.name']}" />
+		<property name="url" value="#{p_datasource['master.url']}" />
+		<property name="username" value="#{p_datasource['master.username']}" />
+		<property name="password" value="#{p_datasource['master.password']}" />
+		<property name="driverClassName" value="#{p_datasource['master.driverClassName']}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="#{p_datasource['master.initialSize']}" />
+		<property name="minIdle" value="#{p_datasource['master.minIdle']}" />
+		<property name="maxActive" value="#{p_datasource['master.maxActive']}" />
+		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="#{p_datasource['master.maxWait']}" />
+		
+		<property name="useUnfairLock" value="#{p_datasource['master.useUnfairLock']}" />
+		<property name="validationQuery" value="#{p_datasource['master.validationQuery']}" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。 -->
+		<property name="testOnBorrow" value="#{p_datasource['master.testOnBorrow']}" />
+		<!-- 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能 -->
+		<property name="testOnReturn" value="#{p_datasource['master.testOnReturn']}" />
+		<property name="testWhileIdle" value="#{p_datasource['master.testWhileIdle']}" />
+		
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="#{p_datasource['master.timeBetweenEvictionRunsMillis']}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="#{p_datasource['master.minEvictableIdleTimeMillis']}" />
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="#{p_datasource['master.filters']}" />
+	</bean>
+	
+	
+	<bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="shardingDataSource" />
+		<property name="configLocation" value="classpath:META-INF/spring/mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath*:mapper/study/*.xml" />
+		<!-- myBatis 的分页插件 -->
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							dialect=mysql
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<!-- SqlSessionTemplate -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sessionFactory" />
+	</bean>
+
+	<!-- Mapper接口所在包名，Spring会自动查找其下的Mapper -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.yixin.study.dao.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sessionFactory" />
+	</bean>
+
+	<!-- 事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="masterDataSource"></property>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+	<!-- 配置事务特性 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- REQUIRED事务的传播性
+				A{ @Transactional(propagation=propagation.REQUIRED)void a(){B b = new B();b.b();}}
+				B{ @Transactional(propagation=propagation.REQUIRED)void b(){//dosomething....}}
+				先调用A对象的a方法，a方法检测没有事务那么就开启一个事务，再调用B对象的b方法时那么B对象检测已经开启事务，那么直接使用上一个事务，这两个方法在一个事务中，谁异常都会导致事务回滚
+			 -->
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" no-rollback-for="java.lang.RuntimeException" />
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.RuntimeException" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false" rollback-for="java.lang.Exception" />
+			<!-- 表示当前方法不必需要具有一个事务上下文。
+			如果当前没有事务，就以非事务方式执行；但是如果有一个事务的话，它就加入到这个事务中运行。 -->
+			<tx:method name="find*" propagation="SUPPORTS" />
+			<tx:method name="get*" propagation="SUPPORTS" />
+			<tx:method name="select*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 配置那些类的方法进行事务管理，当前com.ddtech.webapp.service.impl包中的类中所有方法需要，还需要参考tx:advice的设置 -->
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="allManagerMethod" expression="execution(* com.yixin.study.service.impl.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod" order="0" />
+	</aop:config>
+
+</beans> 
