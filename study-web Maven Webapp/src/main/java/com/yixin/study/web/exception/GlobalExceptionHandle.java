@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  *		   2018年3月2日 上午11:01:25
  *
  */
-@ControllerAdvice
+//@ControllerAdvice
 public class GlobalExceptionHandle {
 
 	Logger logger = Logger.getLogger(GlobalExceptionHandle.class);
 	
-	@ExceptionHandler  
+//	@ExceptionHandler  
 	public void exceptionHandle(HttpServletRequest request,HttpServletResponse response, Exception ex){
 		
-		
+		ex.printStackTrace();
 		logger.error("异常统一处理", ex);
 		String json= "服务器异常";
 		writeJson(json,response);
@@ -40,7 +40,7 @@ public class GlobalExceptionHandle {
 	 * @author YixinCapital -- zhubing
 	 *	       2018年3月2日 上午11:33:44
 	 */
-	@ExceptionHandler(value = IllegalArgumentException.class)
+//	@ExceptionHandler(value = IllegalArgumentException.class)
 	public void illgeArgs(HttpServletResponse response, IllegalArgumentException iceptn){
 		logger.error("特定异常处理", iceptn);
 		String json= "非法参数";
