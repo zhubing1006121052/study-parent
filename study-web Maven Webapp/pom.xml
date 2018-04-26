@@ -23,11 +23,6 @@
   		<artifactId>study-model</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
   	</dependency>
-  	<dependency>
-  		<groupId>com.yixin</groupId>
-  		<artifactId>study-model</artifactId>
-  		<version>0.0.1-SNAPSHOT</version>
-  	</dependency>
   </dependencies>
   
   
