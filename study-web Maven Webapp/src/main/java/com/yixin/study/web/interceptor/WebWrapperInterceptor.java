@@ -1,5 +1,4 @@
 package com.yixin.study.web.interceptor;
-
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;

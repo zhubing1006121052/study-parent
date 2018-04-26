@@ -17,26 +17,7 @@
 		(1)自动注册DefaultAnootationHandlerMapping,AnotationMethodHandlerAdapter 
 		(2)提供一些列：数据绑定，数字和日期的format @NumberFormat, @DateTimeFormat, xml,json默认读写支持 
 	-->
-	<!-- <mvc:annotation-driven /> -->
-	    <mvc:annotation-driven >
-	       <mvc:message-converters register-defaults="false">
-	           <bean class="org.springframework.http.converter.StringHttpMessageConverter">
-	              <beans:constructor-arg index="0" value="UTF-8" />
-	           </bean>
-	       </mvc:message-converters>
-	    </mvc:annotation-driven>
-		
-		<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-			<property name="messageConverters">
-				<util:list>
-					<beans:ref bean="stringHttpMessageConverter"/>
-				</util:list>
-			</property>
-		</bean>
-	
-		<bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
-			<beans:constructor-arg index="0" value="UTF-8" />
-		</bean>
+	<mvc:annotation-driven />
 	<!-- 2.静态资源默认servlet配置
 		(1)加入对静态资源的处理：js,gif,png
 		(2)允许使用"/"做整体映射
@@ -55,11 +36,11 @@
          <aop:pointcut id="basePoint" expression="execution(public * com.yixin.study.web.controller.*.*(..))"/>  
          <aop:advisor pointcut-ref="basePoint" advice-ref="resultWapper"/>
     </aop:config>
-	<!--  <mvc:interceptors>
-	 多个拦截器，顺序执行
+	 <mvc:interceptors>
+	<!--  多个拦截器，顺序执行 -->
 	 	<mvc:interceptor>
 	 		<mvc:mapping path="/**"/>
 	 		<bean class="com.yixin.study.web.interceptor.WebWrapperInterceptor"/>
 	 	</mvc:interceptor>
-	 </mvc:interceptors> -->
+	 </mvc:interceptors>
 </beans>
