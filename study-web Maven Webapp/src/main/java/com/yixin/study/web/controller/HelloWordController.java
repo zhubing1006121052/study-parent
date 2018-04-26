@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.yixin.study.model.vo.CustomerVo;
 
 @Controller
 @RequestMapping("/demo")
@@ -27,5 +30,13 @@ public class HelloWordController {
 		log.debug("");
 		return "{name:'helloword'}";
 	}
+	
+	@RequestMapping(value = "/helloword/bean",method = RequestMethod.POST)
+    @ResponseBody
+    public Object helloword(@RequestBody CustomerVo customer){
+        
+        
+        return customer;
+    }
 }
 

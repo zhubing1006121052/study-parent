@@ -31,9 +31,9 @@
 			<properties>
 				<!-- indicator datasource -->
 				<master.driverClassName>com.mysql.jdbc.Driver</master.driverClassName>
-				<master.url>jdbc:mysql://192.168.145.151:3306/study?useUnicode=true&amp;amp;characterEncoding=UTF-8</master.url>
-				<master.username>mysql</master.username>
-				<master.password>mysql</master.password>
+				<master.url>jdbc:mysql://10.86.41.236:3306/car_qbest?useUnicode=true&amp;amp;characterEncoding=UTF-8</master.url>
+				<master.username>mobilecar_read</master.username>
+				<master.password>xwcszc1314</master.password>
 			</properties>
 		</profile>
 	</profiles>

@@ -30,4 +30,12 @@
 	 	<property name="suffix" value=".jsp" />
 	 </bean> -->
 	 <context:component-scan base-package="com.yixin.study.web.controller"/>
+	 
+	 <mvc:interceptors>
+	 <!-- 多个拦截器，顺序执行 -->
+	 	<mvc:interceptor>
+	 		<mvc:mapping path="/**"/>
+	 		<bean class="com.yixin.study.web.interceptor.WebWrapperInterceptor"/>
+	 	</mvc:interceptor>
+	 </mvc:interceptors>
 </beans>
