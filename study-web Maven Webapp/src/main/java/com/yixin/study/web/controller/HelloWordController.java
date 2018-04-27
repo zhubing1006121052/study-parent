@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +21,8 @@ public class HelloWordController {
 
 	private static final Logger log = LoggerFactory.getLogger(HelloWordController.class);
 	
-	@RequestMapping(value = "/helloword/{index}",method = RequestMethod.GET)
+	@RequestMapping(value = "/helloword/{index}",method = RequestMethod.GET, produces = {
+    "application/json; charset=utf-8" })
 	@ResponseBody
 	public Object helloword(@PathVariable Integer index){
 		
@@ -36,12 +38,13 @@ public class HelloWordController {
 		return customer;
 	}
 	
-	/*@RequestMapping(value = "/helloword/bean",method = RequestMethod.POST, produces = {"application/json; charset=utf-8" })
+	@RequestMapping(value = "/helloword/bean",method = RequestMethod.POST, produces = {
+    "application/json; charset=utf-8" })
     @ResponseBody
     public Object hellowordBean(@RequestBody CustomerVo customer){
         
         
         return customer;
-    }*/
+    }
 }
 
